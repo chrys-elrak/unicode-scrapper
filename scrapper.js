@@ -13,7 +13,7 @@ async function main() {
         waitUntil: 'load',
         timeout: 0,
     });
-    const results = await page.evaluate(() => {
+    const {results, emojis} = await page.evaluate(() => {
         const h1 = document.querySelector('h1');
         const table = document.querySelector('table');
         const rows = table.querySelectorAll('tr');
@@ -22,6 +22,7 @@ async function main() {
         const emojis = {
             __version__: ((h1.textContent || '').split(',')[1] || '').trim(),
         };
+        const results = [];
         rows.forEach(row => {
             const type = row.querySelector('th.bighead > a');
             const subtype = row.querySelector('th.mediumhead > a');
@@ -38,18 +39,20 @@ async function main() {
             const emoji = row.querySelector('td.chars');
             if (code && name && emoji) {
                 const codes = code.innerText.split(' ');
-                emojis[currentType][currentSubType].push({
+                const data = {
                     unicode: codes.length > 1 ? codes : codes[0],
                     multicode: codes.length > 1,
                     name: name.innerText,
                     emoji: emoji.innerText,
-                });
+                };
+                emojis[currentType][currentSubType].push(data);
+                results.push(data);
             }
         });
-        return emojis;
+        return {emojis, results};
     });
-    console.log(results);
-    fs.writeFileSync('emoji.json', JSON.stringify(results, null, 2));
+    fs.writeFileSync('emoji.json', JSON.stringify(emojis, null, 2));
+    fs.writeFileSync('emoji-array.json', JSON.stringify(results, null, 2));
     await browser.close();
 }
 
