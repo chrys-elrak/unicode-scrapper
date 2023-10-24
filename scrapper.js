@@ -2,6 +2,7 @@ import * as puppeteer from "puppeteer";
 import fs from 'fs';
 
 const BASE_URL = `https://unicode.org/emoji/charts/full-emoji-list.html`;
+let version = '1.0.0';
 
 async function main(args = ['json']) {
     if (!['json', 'array', 'jsonarray'].includes(args[0].toLocaleLowerCase())) {
@@ -26,8 +27,9 @@ async function main(args = ['json']) {
         const rows = table.querySelectorAll('tr');
         let currentType = '';
         let currentSubType = '';
+        version = ((h1.textContent || '').split(',')[1] || '').trim();
         const emojis = {
-            __version__: ((h1.textContent || '').split(',')[1] || '').trim(),
+            __version__: version,
         };
         const results = [];
         rows.forEach(row => {
@@ -60,18 +62,18 @@ async function main(args = ['json']) {
     });
     switch (outputType) {
         case 'json':
-            fs.writeFileSync(`emoji${emojis.__version__}.json`, JSON.stringify(emojis, null, 2));
+            fs.writeFileSync(`emoji${version}.json`, JSON.stringify(emojis, null, 2));
             break;
         case 'array':
-            fs.writeFileSync('emoji-array.json', JSON.stringify(results, null, 2));
+            fs.writeFileSync(`emoji-array${version}.json`, JSON.stringify(results, null, 2));
             break;
         case 'jsonarray':
             fs.writeFileSync(
-                "emoji-array.json",
+                `emoji-array${version}.json`,
                 JSON.stringify(results, null, 2)
             );
             fs.writeFileSync(
-                `emoji${emojis.__version__}.json`,
+                `emoji${version}.json`,
                 JSON.stringify(emojis, null, 2)
             );
             break;
