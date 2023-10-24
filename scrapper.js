@@ -3,7 +3,14 @@ import fs from 'fs';
 
 const BASE_URL = `https://unicode.org/emoji/charts/full-emoji-list.html`;
 
-async function main() {
+async function main(args = ['json']) {
+    if (!['json', 'array', 'jsonarray'].includes(args[0].toLocaleLowerCase())) {
+        console.log(
+            '[USAGE]: node scrapper.js [json]|array|jsonarray'
+        );
+        return;
+    }
+    const outputType = args[0];
     const browser = await puppeteer.launch({
         headless: true,
     });
@@ -51,9 +58,27 @@ async function main() {
         });
         return {emojis, results};
     });
-    fs.writeFileSync('emoji.json', JSON.stringify(emojis, null, 2));
-    fs.writeFileSync('emoji-array.json', JSON.stringify(results, null, 2));
+    switch (outputType) {
+        case 'json':
+            fs.writeFileSync(`emoji${emojis.__version__}.json`, JSON.stringify(emojis, null, 2));
+            break;
+        case 'array':
+            fs.writeFileSync('emoji-array.json', JSON.stringify(results, null, 2));
+            break;
+        case 'jsonarray':
+            fs.writeFileSync(
+                "emoji-array.json",
+                JSON.stringify(results, null, 2)
+            );
+            fs.writeFileSync(
+                `emoji${emojis.__version__}.json`,
+                JSON.stringify(emojis, null, 2)
+            );
+            break;
+        default:
+            throw new Error('type not handled');
+    }
     await browser.close();
 }
 
-main();
+main(process.argv.slice(2));
