@@ -62,25 +62,23 @@ async function main(args = ['json']) {
     });
     switch (outputType) {
         case 'json':
-            fs.writeFileSync(`emoji${version}.json`, JSON.stringify(emojis, null, 2));
+            writeFile(emojis);
             break;
         case 'array':
-            fs.writeFileSync(`emoji-array${version}.json`, JSON.stringify(results, null, 2));
+            writeFile(results, 'array');
             break;
         case 'jsonarray':
-            fs.writeFileSync(
-                `emoji-array${version}.json`,
-                JSON.stringify(results, null, 2)
-            );
-            fs.writeFileSync(
-                `emoji${version}.json`,
-                JSON.stringify(emojis, null, 2)
-            );
+            writeFile(emojis);
+            writeFile(results, 'array');
             break;
         default:
             throw new Error('type not handled');
     }
     await browser.close();
+}
+
+function writeFile(data, type = '') {
+    fs.writeFileSync(`emoji${type}${version}.json`, JSON.stringify(data, null, 2));
 }
 
 main(process.argv.slice(2));
