@@ -71,8 +71,6 @@ async function main(args = ['json']) {
             writeFile(emojis);
             writeFile(results, 'array');
             break;
-        default:
-            throw new Error('type not handled');
     }
     await browser.close();
 }
